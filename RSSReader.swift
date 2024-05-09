@@ -66,11 +66,10 @@ public class RSSParser: NSObject, XMLParserDelegate {
     private func handleServerError(_: URLResponse) {
         print("Server error...")
     }
-    //XMLParserDelegate
-//    extension RSSParser {
-        private var feed = RSSFeed()
-        private var currentItem: RSSItem?
-        private var currentElement: String = ""
+
+    private var feed = RSSFeed()
+    private var currentItem: RSSItem?
+    private var currentElement: String = ""
         
     enum Node: String {
         case item = "item"
@@ -81,58 +80,54 @@ public class RSSParser: NSObject, XMLParserDelegate {
     }
         
         
-        public func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName: String?, attributes attributeDict: [String : String]) {
-            if (elementName==Node.item.rawValue) {
-                self.currentItem = RSSItem()
-            }
-            self.currentElement = ""
+    public func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName: String?, attributes attributeDict: [String : String]) {
+        if (elementName==Node.item.rawValue) {
+            self.currentItem = RSSItem()
         }
-        
-        public func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
-            if (elementName == Node.item.rawValue){
-                if let item = self.currentItem {
-                    self.feed.items.append(item)
-                }
-                self.currentItem = nil
-                return
-            }
-            
-            if let item = self.currentItem {
-                if (elementName == Node.title.rawValue) {
-                    item.title = self.currentElement
-                }
-                if (elementName == Node.pubDate.rawValue) {
-                    item.pubDate = self.currentElement
-                }
-                if (elementName == Node.content.rawValue) {
-                    item.content = self.currentElement
-                }
-            } else {
-                if (elementName == Node.title.rawValue) {
-                    feed.title.append(self.currentElement)
-                }
-                if (elementName == Node.description.rawValue) {
-                    feed.description.append(self.currentElement)                    
-                }
-            }
-            
-            
-        }
-        
-        public func parserDidEndDocument(_ parser: XMLParser) {
-            self.completionHandler(self.feed)
-        }
-        
-        public func parser(_ parser: XMLParser, foundCharacters string: String) {
-            if let item = self.currentItem {
-                if (string.trimmingCharacters(in: .whitespacesAndNewlines) != "") {
-                    self.currentElement.append(string)
-                }
-            }
-        }
-        
+        self.currentElement = ""
     }
-//}
+        
+    public func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
+        if (elementName == Node.item.rawValue){
+            if let item = self.currentItem {
+                self.feed.items.append(item)
+            }
+            self.currentItem = nil
+            return
+        }
+            
+        if let item = self.currentItem {
+            if (elementName == Node.title.rawValue) {
+                item.title = self.currentElement
+            }
+            if (elementName == Node.pubDate.rawValue) {
+                item.pubDate = self.currentElement
+            }
+            if (elementName == Node.content.rawValue) {
+                item.content = self.currentElement
+            }
+        } else {
+            if (elementName == Node.title.rawValue) {
+                feed.title.append(self.currentElement)
+            }
+            if (elementName == Node.description.rawValue) {
+                feed.description.append(self.currentElement)                    
+            }
+        }    
+    }
+        
+    public func parserDidEndDocument(_ parser: XMLParser) {
+        self.completionHandler(self.feed)
+    }
+        
+    public func parser(_ parser: XMLParser, foundCharacters string: String) {
+        if let item = self.currentItem {
+            if (string.trimmingCharacters(in: .whitespacesAndNewlines) != "") {
+                self.currentElement.append(string)
+            }
+        }
+    }    
+}
 
 extension Array {
     var mutableLast: Element! {
